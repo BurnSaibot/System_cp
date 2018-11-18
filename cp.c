@@ -31,8 +31,8 @@ void copyFile(char * source, char * target) {
     struct stat stats;          
     int test = fstat(fdSource, &stats);
     if (test < 0){
-	printf("Echec stat source \n");
-	errorPrint();
+	    printf("Echec stat source \n");
+	    errorPrint();
     }
 
     
@@ -42,20 +42,14 @@ void copyFile(char * source, char * target) {
         errorPrint();
     }
 
-    printf(" 1 fd target : %d \n",fdTarget);
     char * buffer = malloc(4096 * sizeof(char));
-    printf(" 2 fd target : %d \n",fdTarget);
-    printf(" Buffer Avant la boucle : %s \n",buffer);
     while(1) {
-	printf(" 3 fd target : %d \n",fdTarget);
 	int readByts = read(fdSource, &buffer, 4096);
 	//printf("Buffer après la boucle : %s \n",buffer);
-	printf(" 4 fd target : %d \n",fdTarget);
-        if (readByts <0) {
+    if (readByts <0) {
 	    printf("Echec Lecture \n");
-            errorPrint();
+        errorPrint();
 	}
-	printf(" 5 fd target : %d \n",fdTarget);
 
 	if (readByts == 0)
 		break;
