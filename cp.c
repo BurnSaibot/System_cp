@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 #include <errno.h>
 #include <unistd.h>
@@ -50,11 +51,27 @@ void copyFile(char * source, char * target) {
     }
 }
 
+void copyDir(char * source, char * target) {
+    struct dirent *pDirent;
+    DIR *pDir;
+
+    pdir = opendir(source);
+    if (pdir == NULL)
+        errorPrint();
+
+    while ((pDirent = readdir(pDir)) != NULL) {
+        char * filename = pDirent->d_name;
+        copyFile(source+"/"+filename,target+"/"+filename);
+
+    }
+}
+
 int main (int argc, char** argv) {
     if (argc != 3 )
         usage(argv[0]);
     // si on a pas une cible et une source, on sort et on rappelle à l'utilisateur comment utiliser le programme
 
-    copyFile(argv[1],argv[2]);
-   return 0;
+    copyDir(argv[1],argv[2]);
+    printf("Done \n");
+    return 0;
 }
