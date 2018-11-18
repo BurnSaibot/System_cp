@@ -22,7 +22,6 @@ void errorPrint() {
 }
 
 void copyFile(char * source, char * target) {
-    printf("Source : %s \n Target : %s \n", source, target);
     int fdSource = open(source,O_RDONLY);
     if ( fdSource < 0 )
         errorPrint();
@@ -45,8 +44,7 @@ void copyFile(char * source, char * target) {
     char * buffer = malloc(4096 * sizeof(char));
     while(1) {
 	int readByts = read(fdSource, &buffer, 4096);
-	//printf("Buffer après la boucle : %s \n",buffer);
-    if (readByts <0) {
+    	if (readByts <0) {
 	    printf("Echec Lecture \n");
         errorPrint();
 	}
@@ -54,7 +52,7 @@ void copyFile(char * source, char * target) {
 	if (readByts == 0)
 		break;
 
-	printf(" 6 fd target : %d \n",fdTarget);
+
         int writenByts = write(fdTarget, &buffer, 4096);
 	
         if (writenByts < 0) {
@@ -62,6 +60,9 @@ void copyFile(char * source, char * target) {
             errorPrint();
 	}
     }
+    close(fdTarget);
+    close(fdSource);
+
 }
 
 void copyDir(char * source, char * target) {
@@ -85,9 +86,7 @@ void copyDir(char * source, char * target) {
         copyFile(sourceFile,targetFile);
 
     }
-	printf("Avant pdir");
 	closedir(pDir);
-	printf("Après pdir");
 }
 
 int main (int argc, char** argv) {
