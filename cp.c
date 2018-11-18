@@ -26,6 +26,7 @@ void errorPrint() {
 }
 
 void copyFile(char * source, char * target) {
+    printf("Copying : %s \n",source); 
     int fdSource = open(source,O_RDONLY);
     if ( fdSource < 0 ) {
         printf("Echec de l'ouverture de la source \n");
@@ -44,7 +45,7 @@ void copyFile(char * source, char * target) {
     
     int fdTarget = open(target,O_CREAT|O_WRONLY|O_TRUNC, stats.st_mode);
     if ( fdTarget <0){
-	    printf("Echec target \n");
+	    printf("Echec target : %s \n", target);
         errorPrint();
     }
 
@@ -69,27 +70,30 @@ void copyFile(char * source, char * target) {
     }
     close(fdTarget);
     close(fdSource);
-    printf("%s : done",source);
+    printf("%s : Done \n",source);
 
 }
 
 void copyDir(char * sourcePath, char * targetPath) {
+	printf("Copying : %s \n",sourcePath);
     char * source;
     char * target;
 
     if ( ! testFn(sourcePath,'/')){
-        source = malloc( srtlen(sourcePath)+1);
-        strcat(source,sourcePath);
+        source = malloc( strlen(sourcePath)+1);
+        strcpy(source,sourcePath);
         strcat(source,"/");
     } else {
+	source = malloc(strlen(sourcePath));
         source = sourcePath;
     }
 
     if ( ! testFn(targetPath,'/')){
-        target = malloc( srtlen(targetPath)+1);
-        strcat(target,targetPath);
+        target = malloc( strlen(targetPath)+1);
+        strcpy(target,targetPath);
         strcat(target,"/");
     } else {
+	target = malloc(strlen(targetPath));
         target = targetPath;
     }
 
@@ -108,23 +112,34 @@ void copyDir(char * sourcePath, char * targetPath) {
 
         char * sourceFile = malloc(strlen(filename) + strlen(source) + 1);
         char * targetFile = malloc(strlen(filename) + strlen(target) +1);
-        strcat(sourceFile,source);
+	//sourceFile = "\0";
+	//targetFile = "\0";
+	//printf("Buffer : %s\nsource : %s\nfilename : %s\n",sourceFile,source,filename);
+        strcpy(sourceFile,source);
         strcat(sourceFile,filename);
-        strcat(targetFile,target);
+	//printf("Buffer : %s\nsource : %s\nfilename : %s\n",sourceFile,source,filename);
+
+	//printf("Buffer : %s\ntarget : %s\nfilename : %s\n",targetFile,target,filename);
+        strcpy(targetFile,target);
         strcat(targetFile,filename);
+	//printf("Buffer : %s\ntarget : %s\nfilename : %s\n",targetFile,target,filename);
 
         struct stat stats;          
-        int test = fstat(sourceFile, &stats);
+        stat(sourceFile, &stats);
 
         if (S_ISDIR(stats.st_mode)){
-            mkdir(sourceFile,stats.st_mode & ~unmask & 0777);
-            copyDir(sourceFile,targetFile)
+            mkdir(targetFile,stats.st_mode);
+            copyDir(sourceFile,targetFile);
         } else {
             copyFile(sourceFile,targetFile);
-        }   
+        }
+	printf("SourceFile : %p\nTargetFile : %p\n",sourceFile,targetFile);
+	free(sourceFile);
+	free(targetFile);  
     }
+	printf("source : %p\ntarget: %p\n",target,source);
 	closedir(pDir);
-    printf("%s : Done ", source);
+    printf("%s : Done \n", source);
 }
 
 int main (int argc, char** argv) {
@@ -135,7 +150,7 @@ int main (int argc, char** argv) {
     char * target;
 
     if ( ! testFn(argv[1],'/')){
-        source = malloc( srtlen(argv[1])+1);
+        source = malloc( strlen(argv[1])+1);
         strcat(source,argv[1]);
         strcat(source,"/");
     } else {
@@ -143,7 +158,7 @@ int main (int argc, char** argv) {
     }
 
     if ( ! testFn(argv[2],'/')){
-        target = malloc( srtlen(argv[2])+1);
+        target = malloc( strlen(argv[2])+1);
         strcat(target,argv[2]);
         strcat(target,"/");
     } else {
@@ -151,14 +166,14 @@ int main (int argc, char** argv) {
     }
 
     struct stat stats;          
-    int test = fstat(source, &stats);
+    stat(source, &stats);
 
     if (S_ISDIR(stats.st_mode)){
-        mkdir(source,stats.st_mode & ~unmask & 0777);
-        copyDir(source,argv[2])
+        mkdir(target,stats.st_mode & 0777);
+        copyDir(source,argv[2]);
     } else {
         copyFile(source,argv[2]);
-    }  
+    }	 
     printf("Done \n");
     return 0;
 }
