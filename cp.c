@@ -22,6 +22,7 @@ void errorPrint() {
 }
 
 void copyFile(char * source, char * target) {
+    printf("Source : %s \n Target : %s \n", source, target);
     int fdSource = open(source,O_RDONLY);
     if ( fdSource == -1 )
         errorPrint();
@@ -29,41 +30,69 @@ void copyFile(char * source, char * target) {
 
     struct stat stats;          
     int test = fstat(fdSource, &stats);
-    if (test == -1)
+    if (test == -1){
+	printf("Echec stat source \n");
 	errorPrint();
+    }
 
-    int fdTarget = open(target+,O_CREAT|O_WRONLY|O_TRUNC, stats.st_mode);
-    if ( fdTarget == -1 )
+    
+    int fdTarget = open(target,O_CREAT|O_WRONLY|O_TRUNC, stats.st_mode);
+    if ( fdTarget == -1 ){
+	printf("Echec target \n");
         errorPrint();
+    }
 
+    printf(" 1 fd target : %d \n",fdTarget);
     int * buffer = malloc(4096);
+    printf(" 2 fd target : %d \n",fdTarget);
 
     while(1) {
+	printf(" 3 fd target : %d \n",fdTarget);
 	int readByts = read(fdSource, &buffer, 4096);
-        if (readByts == -1)
+	printf(" 4 fd target : %d \n",fdTarget);
+        if (readByts == -1) {
+	    printf("Echec Lecture \n");
             errorPrint();
-	
+	}
+	printf(" 5 fd target : %d \n",fdTarget);
+
 	if (readByts == 0)
 		break;
+
+	printf(" 6 fd target : %d \n",fdTarget);
         int writenByts = write(fdTarget, &buffer, 4096);
-        if (writenByts == -1)
+	
+        if (writenByts == -1) {
+            printf("Echec Ecriture \n");
             errorPrint();
+	}
     }
 }
 
 void copyDir(char * source, char * target) {
     struct dirent *pDirent;
     DIR *pDir;
+    pDir = opendir(source);
 
-    pdir = opendir(source);
-    if (pdir == NULL)
+    if (pDir == NULL)
         errorPrint();
 
     while ((pDirent = readdir(pDir)) != NULL) {
-        char * filename = pDirent->d_name;
-        copyFile(source+"/"+filename,target+"/"+filename);
+	char * filename = pDirent->d_name;
+	if(strcmp(filename, "..") == 0) continue;
+        if(strcmp(filename, ".") == 0) continue;
+	char * sourceFile = malloc(strlen(filename) + strlen(source) + 1);
+	char * targetFile = malloc(strlen(filename) + strlen(target) +1);
+	strcat(sourceFile,source);
+	strcat(sourceFile,filename);
+	strcat(targetFile,target);
+	strcat(targetFile,filename);
+        copyFile(sourceFile,targetFile);
 
     }
+	printf("Avant pdir");
+	closedir(pDir);
+	printf("Après pdir");
 }
 
 int main (int argc, char** argv) {
