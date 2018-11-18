@@ -12,7 +12,7 @@
  
 
 void usage(char * name) {
-    printf("usage : %s <pathFromSource> <pathFromTarget \n",name);
+    printf("usage : %s <pathFromSource> <pathFromTarget> \n",name);
     exit(84);
 }
 
@@ -24,33 +24,34 @@ void errorPrint() {
 void copyFile(char * source, char * target) {
     printf("Source : %s \n Target : %s \n", source, target);
     int fdSource = open(source,O_RDONLY);
-    if ( fdSource == -1 )
+    if ( fdSource < 0 )
         errorPrint();
     // si il y a eut une erreur, on l'affiche et on sort
 
     struct stat stats;          
     int test = fstat(fdSource, &stats);
-    if (test == -1){
+    if (test < 0){
 	printf("Echec stat source \n");
 	errorPrint();
     }
 
     
     int fdTarget = open(target,O_CREAT|O_WRONLY|O_TRUNC, stats.st_mode);
-    if ( fdTarget == -1 ){
+    if ( fdTarget <0){
 	printf("Echec target \n");
         errorPrint();
     }
 
     printf(" 1 fd target : %d \n",fdTarget);
-    int * buffer = malloc(4096);
+    char * buffer = malloc(4096 * sizeof(char));
     printf(" 2 fd target : %d \n",fdTarget);
-
+    printf(" Buffer Avant la boucle : %s \n",buffer);
     while(1) {
 	printf(" 3 fd target : %d \n",fdTarget);
 	int readByts = read(fdSource, &buffer, 4096);
+	//printf("Buffer après la boucle : %s \n",buffer);
 	printf(" 4 fd target : %d \n",fdTarget);
-        if (readByts == -1) {
+        if (readByts <0) {
 	    printf("Echec Lecture \n");
             errorPrint();
 	}
@@ -62,7 +63,7 @@ void copyFile(char * source, char * target) {
 	printf(" 6 fd target : %d \n",fdTarget);
         int writenByts = write(fdTarget, &buffer, 4096);
 	
-        if (writenByts == -1) {
+        if (writenByts < 0) {
             printf("Echec Ecriture \n");
             errorPrint();
 	}
